@@ -1,0 +1,29 @@
+name: Keep FalixNodes Alive
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Run every 5 minutes
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping FalixNodes Console
+        run: |
+          # Cookies from browser session
+          COOKIES="_sharedID=b5684e1f-cd11-470a-9201-e071fed7e04e; _sharedID_cst=TyylLI8srA%3D%3D; _sharedID_last=Mon%2C%2016%20Mar%202026%2013%3A29%3A55%20GMT; _lr_retry_request=true; _lr_env_src_ats=false; hb_insticator_uid=78acc279-bc03-49df-887c-d9bc6a0e9641; cto_bundle=dJlm8F9rTkNESEVzSkl6bUQ4dHRhSGpTOVo2bHBWd05URGZYZ2VCSTE3OXdFVHA1TzdCSWU0WEdBNER0Zk5vUjB2cWtVOG8xWFJFVnhRNjBVRnJTdHZTa1Uya2NnQjJDcmpFJTJGNFo5dDB2NDRlM2g1S1A5TEZvU2wwSmt1TXU0TWJXS1YlMkJRZTFma0g4c3k2QXlldUpxTGFCYXpBJTNEJTNE; __gads=ID=4ac05a7b9fbc7bd1:T=1773667799:RT=1773667799:S=ALNI_MZO1H9KGmifgI81kJ-419g-psw3zQ; __gpi=UID=0000122038481aea:T=1773667799:RT=1773667799:S=ALNI_MaoVw6rdbHinBfnO30YqiuYhi2MFQ; __eoi=ID=fa081ebaf881bd90:T=1773667799:RT=1773667799:S=AA-AfjZsvNZgm362gcqBcu3tduSb; ac_user_id=ac7qwvy087vjxu3ab1d15d7386acefc5eae0e702600df387ef61a8d232c6a506b42c274867862ea; __qca=P1-bdb39a52-d6f3-4ee5-a5c4-c944f6da00ba"
+          
+          # Ping the console URL with cookies
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Cookie: $COOKIES" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            "https://client.falixnodes.net/server/2783469/console" || true)
+          
+          echo "[$(date '+%Y-%m-%d %H:%M:%S')] Ping response: $RESPONSE"
+          
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Server is alive!"
+          else
+            echo "⚠️ Response code: $RESPONSE"
+          fi
